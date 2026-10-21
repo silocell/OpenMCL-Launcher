@@ -14,6 +14,7 @@ from PyInstaller.utils.hooks import collect_submodules
 
 ROOT = Path(SPECPATH).resolve()
 ICONS = ROOT / "packaging" / "icons"
+VERSION_INFO = ROOT / "packaging" / "version_info.txt"
 
 onedir = "--onedir" in sys.argv
 
@@ -83,6 +84,11 @@ common = dict(
     entitlements_file=None,
     icon=icon,
 )
+
+# PyInstaller rejects --version-file on the command line when a .spec is given,
+# so the Windows version resource is attached here instead.
+if sys.platform == "win32" and VERSION_INFO.exists():
+    common["version"] = str(VERSION_INFO)
 
 if onedir:
     exe = EXE(pyz, a.scripts, [], exclude_binaries=True, **common)

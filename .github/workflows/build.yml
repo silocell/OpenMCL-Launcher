@@ -53,12 +53,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt pyinstaller
 
-      - name: Build (Windows)
-        if: runner.os == 'Windows'
-        run: python -m PyInstaller openmcl.spec --noconfirm --version-file packaging/version_info.txt
-
-      - name: Build (macOS and Linux)
-        if: runner.os != 'Windows'
+      - name: Build
         run: python -m PyInstaller openmcl.spec --noconfirm
 
       - name: Smoke test (Windows)

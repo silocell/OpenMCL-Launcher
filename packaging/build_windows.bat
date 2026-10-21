@@ -25,7 +25,7 @@ if /i "%1"=="onedir" (
     echo.
     echo Done: dist\OpenMCL\OpenMCL.exe
 ) else (
-    python -m PyInstaller openmcl.spec --noconfirm --version-file packaging\version_info.txt || exit /b 1
+    python -m PyInstaller openmcl.spec --noconfirm || exit /b 1
     echo.
     echo Done: dist\OpenMCL.exe
 )
