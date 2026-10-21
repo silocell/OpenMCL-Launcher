@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Builds
+build/
+dist/
+*.egg-info/
+packaging/icons/*.iconset/
+
+# Never commit these: they hold account tokens and API keys.
+# They normally live in the OS data directory, but a portable install
+# (OPENMCL_HOME set to the project folder) would put them here.
+settings.json
+accounts.json
+instances/
+shared/
+cache/
+logs/
