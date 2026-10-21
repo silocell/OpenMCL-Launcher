@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenMCL — a Minecraft launcher</title>
+<meta name="description" content="An open-source Minecraft launcher. Isolated instances, Fabric, Quilt, NeoForge and Forge, mods from Modrinth and CurseForge, Microsoft account sign-in.">
+<meta property="og:title" content="OpenMCL">
+<meta property="og:description" content="Keep every pack in its own box. An open-source Minecraft launcher for Windows, macOS and Linux.">
+<meta property="og:image" content="https://silocell.github.io/OpenMCL-Launcher/shot-instances.png">
+<meta name="theme-color" content="#0e1311">
+<link rel="icon" href="openmcl.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,75..125,400..800;1,75..125,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1311; --surface:#161c19; --raised:#1d2521;
+  --line:#243029; --line-soft:#1b231f;
+  --ink:#e8ede9; --dim:#8fa096; --dimmer:#67756c;
+  --moss:#5fa87a; --moss-deep:#3f7a57; --amber:#d9a441;
+  --measure:62ch;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Archivo",system-ui,sans-serif;
+  font-variation-settings:"wdth" 100;
+  font-size:17px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--moss); text-decoration-thickness:1px; text-underline-offset:3px}
+a:hover{color:var(--ink)}
+:focus-visible{outline:2px solid var(--moss); outline-offset:3px; border-radius:2px}
+.wrap{max-width:1080px; margin:0 auto; padding:0 24px}
+
+/* ---------- hero ---------- */
+.hero{position:relative; overflow:hidden; border-bottom:1px solid var(--line)}
+/* A faint lattice: the launcher's grid of instance tiles, abstracted. */
+.hero::before{
+  content:""; position:absolute; inset:0;
+  background-image:linear-gradient(var(--line-soft) 1px,transparent 1px),
+                   linear-gradient(90deg,var(--line-soft) 1px,transparent 1px);
+  background-size:52px 52px;
+  mask-image:radial-gradient(120% 90% at 18% 10%,#000 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-inner{position:relative; display:grid; grid-template-columns:minmax(0,5fr) minmax(0,6fr);
+  gap:56px; align-items:center; padding:92px 0 84px}
+h1{
+  margin:0 0 20px; font-size:clamp(2.6rem,6vw,4.1rem); line-height:1.02;
+  font-variation-settings:"wdth" 118; font-weight:700; letter-spacing:-.022em;
+}
+.lede{margin:0 0 34px; max-width:46ch; color:var(--dim); font-size:1.08rem}
+.lede strong{color:var(--ink); font-weight:600}
+
+.get{display:flex; flex-wrap:wrap; gap:14px; align-items:center}
+.btn{
+  display:inline-flex; align-items:baseline; gap:10px;
+  background:var(--moss); color:#0c1310; font-weight:700;
+  font-variation-settings:"wdth" 108;
+  padding:15px 26px; border-radius:3px; border:0;
+  text-decoration:none; font-size:1.02rem; cursor:pointer;
+  transition:background .15s ease;
+}
+.btn:hover{background:#74bd8e; color:#0c1310}
+.btn .meta{font-weight:400; font-size:.84rem; opacity:.72}
+.alt{font-size:.9rem; color:var(--dimmer)}
+.alt a{color:var(--dim)}
+
+.shot{
+  margin:0; border:1px solid var(--line); border-radius:5px; overflow:hidden;
+  background:var(--surface); box-shadow:0 24px 70px -28px #000;
+}
+.shot img{display:block; width:100%; height:auto}
+
+/* ---------- shared section furniture ---------- */
+section{border-bottom:1px solid var(--line)}
+.band{padding:76px 0}
+h2{margin:0 0 10px; font-size:1.52rem; font-weight:700; letter-spacing:-.015em;
+   font-variation-settings:"wdth" 112}
+.sub{margin:0 0 38px; color:var(--dim); max-width:var(--measure)}
+
+/* ---------- setup notice ---------- */
+.notice{background:var(--surface)}
+.notice .band{padding:56px 0}
+.notice-grid{display:grid; grid-template-columns:auto minmax(0,1fr); gap:22px; align-items:start}
+.bar{width:3px; align-self:stretch; background:var(--amber); border-radius:2px}
+.notice h2{color:var(--amber); font-size:1.22rem; margin-bottom:12px}
+.notice p{margin:0 0 12px; max-width:var(--measure); color:var(--dim)}
+.notice p:last-child{margin-bottom:0}
+
+/* ---------- features: ruled list, not cards ---------- */
+.rows{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 56px}
+.row{padding:24px 0; border-top:1px solid var(--line)}
+.row h3{margin:0 0 6px; font-size:1.02rem; font-weight:700}
+.row p{margin:0; color:var(--dim); font-size:.96rem; max-width:40ch}
+
+/* ---------- plain-spoken limits ---------- */
+.limits{background:var(--surface)}
+.limits ul{margin:0; padding:0; list-style:none; max-width:var(--measure)}
+.limits li{padding:16px 0; border-top:1px solid var(--line); color:var(--dim)}
+.limits li:first-child{border-top:0}
+.limits b{color:var(--ink); font-weight:600}
+
+/* ---------- platforms ---------- */
+.plats{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px;
+  background:var(--line); border:1px solid var(--line); border-radius:4px; overflow:hidden}
+.plat{background:var(--bg); padding:26px 24px}
+.plat h3{margin:0 0 4px; font-size:1rem; font-weight:700}
+.plat p{margin:0 0 16px; color:var(--dimmer); font-size:.88rem}
+.plat a{font-weight:600; font-size:.95rem}
+
+footer{padding:52px 0 64px; color:var(--dimmer); font-size:.88rem}
+footer p{margin:0 0 10px; max-width:var(--measure)}
+footer a{color:var(--dim)}
+
+@media (max-width:860px){
+  .hero-inner{grid-template-columns:1fr; gap:44px; padding:64px 0 56px}
+  .rows,.plats{grid-template-columns:1fr}
+  .plats{gap:1px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap hero-inner">
+    <div>
+      <h1>Keep every pack in its own box.</h1>
+      <p class="lede">OpenMCL gives each Minecraft setup its own worlds, mods and Java, so
+        updating one never breaks another. Four mod loaders, installed for you.
+        <strong>Modrinth and CurseForge in one search.</strong></p>
+
+      <div class="get">
+        <a class="btn" id="download" href="https://github.com/silocell/OpenMCL-Launcher/releases">
+          <span id="dl-label">Download</span>
+          <span class="meta" id="dl-meta">latest release</span>
+        </a>
+        <span class="alt" id="alt-links">
+          <a href="https://github.com/silocell/OpenMCL-Launcher/releases">All downloads</a> ·
+          <a href="https://github.com/silocell/OpenMCL-Launcher">Source</a>
+        </span>
+      </div>
+    </div>
+
+    <figure class="shot">
+      <img src="shot-instances.png" width="1180" height="740"
+           alt="The OpenMCL instances screen: a grid of cards, each showing a pack name, its Minecraft version and mod loader, and a Play button.">
+    </figure>
+  </div>
+</header>
+
+<section class="notice">
+  <div class="wrap band notice-grid">
+    <div class="bar" aria-hidden="true"></div>
+    <div>
+      <h2>One setup step before you play</h2>
+      <p>Mojang only accepts sign-ins from registered applications, so OpenMCL cannot
+        ship with a sign-in key of its own. You register a free Microsoft application
+        and paste its ID into Settings. It takes a few minutes, once.</p>
+      <p>You also need a Microsoft account that owns Minecraft: Java Edition.
+        <a href="https://github.com/silocell/OpenMCL-Launcher#microsoft-sign-in-setup">The setup guide</a>
+        walks through every click.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap band">
+    <h2>What it does</h2>
+    <p class="sub">The things a launcher is for, without the parts that get in the way.</p>
+    <div class="rows">
+      <div class="row">
+        <h3>Instances that stay separate</h3>
+        <p>Own worlds, mods, configs, memory and Java version. Break one, the rest are fine.</p>
+      </div>
+      <div class="row">
+        <h3>Fabric, Quilt, NeoForge, Forge</h3>
+        <p>Pick a loader when you make an instance. It installs itself, including Forge's
+          patching step.</p>
+      </div>
+      <div class="row">
+        <h3>Mods from both places</h3>
+        <p>Search Modrinth and CurseForge side by side, filtered to the version and loader
+          you're actually running. Dependencies come along.</p>
+      </div>
+      <div class="row">
+        <h3>Modpacks in and out</h3>
+        <p>Import <code>.mrpack</code> and CurseForge zips. Export any instance back out
+          to share it.</p>
+      </div>
+      <div class="row">
+        <h3>Updates you can see coming</h3>
+        <p>Check every installed mod against its newest build, then update the ones you want.</p>
+      </div>
+      <div class="row">
+        <h3>Make it yours</h3>
+        <p>Three themes, any accent colour, per-instance settings for everything that matters.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="limits">
+  <div class="wrap band">
+    <h2>Worth knowing first</h2>
+    <p class="sub">Things people usually find out after downloading.</p>
+    <ul>
+      <li><b>You need to own the game.</b> OpenMCL checks your account owns Minecraft:
+        Java Edition and won't launch otherwise. There is no offline or cracked mode,
+        and there won't be one.</li>
+      <li><b>Windows will warn you.</b> The build isn't code-signed, so SmartScreen shows
+        “Windows protected your PC”. Choose More info, then Run anyway.</li>
+      <li><b>First launch is slow.</b> The single-file build unpacks itself each time it
+        starts. Build the folder version if that bothers you.</li>
+      <li><b>CurseForge browsing needs a free key.</b> Modrinth works out of the box.
+        Some CurseForge mods block third-party downloads entirely — OpenMCL tells you
+        which and links you to the page.</li>
+      <li><b>It's version 0.1.0.</b> Expect rough edges, and
+        <a href="https://github.com/silocell/OpenMCL-Launcher/issues">report them</a>.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="wrap band">
+    <h2>Get it</h2>
+    <p class="sub">Python isn't needed — each download is self-contained.</p>
+    <div class="plats">
+      <div class="plat">
+        <h3>Windows</h3>
+        <p>Windows 10 or later, 64-bit</p>
+        <a href="https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL.exe">OpenMCL.exe</a>
+      </div>
+      <div class="plat">
+        <h3>macOS</h3>
+        <p>macOS 11 or later</p>
+        <a href="https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL-macos.zip">OpenMCL.app</a>
+      </div>
+      <div class="plat">
+        <h3>Linux</h3>
+        <p>64-bit, glibc 2.35 or later</p>
+        <a href="https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL">OpenMCL</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap">
+  <p>OpenMCL is free software under the
+    <a href="https://github.com/silocell/OpenMCL-Launcher/blob/main/LICENSE">GNU GPL v3</a>.
+    <a href="https://github.com/silocell/OpenMCL-Launcher">Source on GitHub</a>.</p>
+  <p>Not affiliated with, endorsed by or connected to Mojang, Microsoft, Modrinth or
+    CurseForge. Minecraft is a trademark of Mojang Synergies AB. Game files are
+    downloaded from Mojang's own servers and a legitimate account is required.</p>
+</footer>
+
+<script>
+(function () {
+  var base = "https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/";
+  var builds = {
+    win:   { label: "Download for Windows", meta: "OpenMCL.exe · 48 MB", file: "OpenMCL.exe" },
+    mac:   { label: "Download for macOS",   meta: "OpenMCL.app · 72 MB", file: "OpenMCL-macos.zip" },
+    linux: { label: "Download for Linux",   meta: "OpenMCL · 78 MB",     file: "OpenMCL" }
+  };
+
+  var ua = (navigator.userAgentData && navigator.userAgentData.platform) ||
+           navigator.platform || navigator.userAgent || "";
+  ua = ua.toLowerCase();
+
+  var key = null;
+  if (ua.indexOf("win") === 0 || ua.indexOf("windows") > -1) key = "win";
+  else if (ua.indexOf("mac") > -1 || ua.indexOf("darwin") > -1) key = "mac";
+  else if (ua.indexOf("linux") > -1 || ua.indexOf("x11") > -1) key = "linux";
+
+  // Phones and anything unrecognised keep the neutral button and the full list.
+  if (!key || /android|iphone|ipad/.test(ua)) return;
+
+  var build = builds[key];
+  document.getElementById("dl-label").textContent = build.label;
+  document.getElementById("dl-meta").textContent = build.meta;
+  document.getElementById("download").href = base + build.file;
+})();
+</script>
+</body>
+</html>
