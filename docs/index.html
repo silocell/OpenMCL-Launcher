@@ -87,6 +87,35 @@ h2{margin:0 0 10px; font-size:1.52rem; font-weight:700; letter-spacing:-.015em;
    font-variation-settings:"wdth" 112}
 .sub{margin:0 0 38px; color:var(--dim); max-width:var(--measure)}
 
+/* ---------- heads-up under the download ---------- */
+.heads-up{margin:16px 0 0; font-size:.88rem; color:var(--dimmer); max-width:44ch}
+.heads-up a{color:var(--dim)}
+
+/* ---------- first run ---------- */
+.os{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:34px; margin-bottom:46px}
+.os-col h3{margin:0 0 14px; font-size:1.05rem; font-weight:700}
+/* A sketch of the dialog, so it is recognised rather than described. */
+.dialog{
+  margin:0 0 16px; padding:18px 20px; border-radius:4px;
+  background:#2c4c86; color:#eef2f9; border:1px solid #3a5e9c;
+  max-width:36ch;
+}
+.dialog-title{font-size:1.06rem; font-weight:700; margin-bottom:8px}
+.dialog-body{margin:0 0 10px; font-size:.86rem; line-height:1.45; opacity:.92}
+.dialog-link{margin:0; font-size:.86rem; text-decoration:underline}
+.steps{margin:0; padding-left:1.2em; color:var(--dim); font-size:.95rem}
+.steps li{margin-bottom:7px}
+.steps b{color:var(--ink); font-weight:600}
+.why{border-top:1px solid var(--line); padding-top:28px}
+.why h3{margin:0 0 12px; font-size:1.05rem; font-weight:700}
+.why p{margin:0 0 14px; color:var(--dim); max-width:var(--measure)}
+pre{
+  margin:0 0 14px; padding:13px 15px; overflow-x:auto;
+  background:var(--raised); border:1px solid var(--line); border-radius:4px;
+}
+pre code{font-size:.85rem; color:var(--ink)}
+code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.9em}
+
 /* ---------- setup notice ---------- */
 .notice{background:var(--surface)}
 .notice .band{padding:56px 0}
@@ -123,7 +152,7 @@ footer a{color:var(--dim)}
 
 @media (max-width:860px){
   .hero-inner{grid-template-columns:1fr; gap:44px; padding:64px 0 56px}
-  .rows,.plats{grid-template-columns:1fr}
+  .rows,.plats,.os{grid-template-columns:1fr}
   .plats{gap:1px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -149,6 +178,8 @@ footer a{color:var(--dim)}
           <a href="https://github.com/silocell/OpenMCL-Launcher">Source</a>
         </span>
       </div>
+      <p class="heads-up">Your computer will warn you that OpenMCL is unrecognised.
+        <a href="#first-run">Here's why, and what to click.</a></p>
     </div>
 
     <figure class="shot">
@@ -157,6 +188,60 @@ footer a{color:var(--dim)}
     </figure>
   </div>
 </header>
+
+<section id="first-run" class="firstrun">
+  <div class="wrap band">
+    <h2>What you'll see the first time</h2>
+    <p class="sub">Both Windows and macOS warn about software they haven't seen
+      before. It isn't a virus warning, and nothing has gone wrong.</p>
+
+    <div class="os">
+      <div class="os-col">
+        <h3>Windows</h3>
+        <figure class="dialog" aria-hidden="true">
+          <div class="dialog-title">Windows protected your PC</div>
+          <p class="dialog-body">Microsoft Defender SmartScreen prevented an
+            unrecognised app from starting.</p>
+          <p class="dialog-link">More info</p>
+        </figure>
+        <ol class="steps">
+          <li>Click <b>More info</b> — the small link, easy to miss.</li>
+          <li>A <b>Run anyway</b> button appears. Click it.</li>
+        </ol>
+      </div>
+
+      <div class="os-col">
+        <h3>macOS</h3>
+        <figure class="dialog" aria-hidden="true">
+          <div class="dialog-title">“OpenMCL” can't be opened</div>
+          <p class="dialog-body">Apple could not verify “OpenMCL” is free of
+            malware that may harm your Mac.</p>
+          <p class="dialog-link">Done</p>
+        </figure>
+        <ol class="steps">
+          <li><b>Right-click</b> OpenMCL in Applications.</li>
+          <li>Choose <b>Open</b>, then <b>Open</b> again.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="why">
+      <h3>Why it happens</h3>
+      <p>Operating systems trust software by reputation, and reputation is bought
+        and earned: a code-signing certificate costs a few hundred pounds a year,
+        and even then the warning only fades after a few hundred people have
+        installed it without trouble. A new free project starts with neither.</p>
+      <p>So rather than ask you to take its word for it, every OpenMCL download is
+        built in the open — on GitHub's own machines, from the source in this
+        repository, with a log of every step. Each file carries a cryptographic
+        attestation proving it came from that build and was not swapped afterwards.
+        If you have the GitHub CLI, you can check for yourself:</p>
+      <pre><code>gh attestation verify OpenMCL.exe --repo silocell/OpenMCL-Launcher</code></pre>
+      <p>Checksums for every file are published alongside each release in
+        <code>SHA256SUMS</code>.</p>
+    </div>
+  </div>
+</section>
 
 <section class="notice">
   <div class="wrap band notice-grid">
@@ -217,8 +302,6 @@ footer a{color:var(--dim)}
       <li><b>You need to own the game.</b> OpenMCL checks your account owns Minecraft:
         Java Edition and won't launch otherwise. There is no offline or cracked mode,
         and there won't be one.</li>
-      <li><b>Windows will warn you.</b> The build isn't code-signed, so SmartScreen shows
-        “Windows protected your PC”. Choose More info, then Run anyway.</li>
       <li><b>First launch is slow on Windows.</b> The single-file build unpacks
         itself each time it starts, so the window takes a few seconds to appear.</li>
       <li><b>CurseForge browsing needs a free key.</b> Modrinth works out of the box.

@@ -117,14 +117,65 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      # Required to publish build provenance, which lets anyone verify a
+      # download was produced by this workflow from this source.
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
-      - name: List what will be published
-        run: find artifacts -type f -printf '%f  %s bytes\n'
+
+      - name: Collect the downloads
+        run: |
+          mkdir -p release
+          find artifacts -type f -exec mv {} release/ ";"
+          ls -lh release
+
+      - name: Write checksums
+        working-directory: release
+        run: |
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            release/OpenMCL.exe
+            release/OpenMCL.dmg
+            release/OpenMCL-x86_64.AppImage
+
       - uses: softprops/action-gh-release@v2
         with:
-          files: artifacts/**/*
+          files: release/*
           generate_release_notes: true
           fail_on_unmatched_files: true
+          body: |
+            ## Downloads
+
+            | Platform | File |
+            | --- | --- |
+            | Windows 10+ | `OpenMCL.exe` |
+            | macOS 11+ | `OpenMCL.dmg` |
+            | Linux 64-bit | `OpenMCL-x86_64.AppImage` |
+
+            **Windows will say "Windows protected your PC".** The build isn't
+            code-signed. Choose **More info**, then **Run anyway**.
+            [Why this happens.](https://silocell.github.io/OpenMCL-Launcher/#first-run)
+
+            **macOS will refuse to open it.** Right-click the app and choose
+            **Open**, then **Open** again.
+
+            ### Verifying your download
+
+            Every file is listed in `SHA256SUMS`, and each one carries a build
+            attestation proving it was produced by this repository's public
+            workflow. Check one with the GitHub CLI:
+
+            ```
+            gh attestation verify OpenMCL.exe --repo silocell/OpenMCL-Launcher
+            ```
+
+            You need a Microsoft account that owns Minecraft: Java Edition.
+            [Sign-in setup.](https://github.com/silocell/OpenMCL-Launcher#set-up-sign-in)

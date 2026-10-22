@@ -33,12 +33,32 @@ You need a Microsoft account that owns **Minecraft: Java Edition**. OpenMCL
 checks that it does and won't launch otherwise. There is no offline or cracked
 mode, and there won't be one.
 
-### First run
+### Your computer will warn you
 
-**Windows** shows “Windows protected your PC”, because the build isn't
-code-signed. Choose *More info* → *Run anyway*.
+Both Windows and macOS warn about software they haven't seen before. It isn't a
+virus warning, and nothing has gone wrong.
 
-**macOS** blocks it for the same reason. Right-click the app → *Open* → *Open*.
+**Windows** — “Windows protected your PC”. Click **More info** (a small link
+that's easy to miss), then **Run anyway**.
+
+**macOS** — “OpenMCL can't be opened”. Right-click the app in Applications,
+choose **Open**, then **Open** again.
+
+Operating systems trust software by reputation, and a new free project has
+none. A code-signing certificate costs a few hundred pounds a year and
+[doesn't remove the warning either](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)
+— Microsoft's own documentation says reputation takes weeks and hundreds of
+clean installs, whatever you sign with.
+
+So instead of asking you to take its word for it, every download is built in
+public, on GitHub's machines, from the source in this repository. Each file
+carries a cryptographic attestation proving it came from that build:
+
+```bash
+gh attestation verify OpenMCL.exe --repo silocell/OpenMCL-Launcher
+```
+
+Checksums for every file ship with each release in `SHA256SUMS`.
 
 On Windows the single-file build unpacks itself on each launch, so the first
 window takes a few seconds to appear. That's normal. The macOS and Linux
@@ -124,7 +144,6 @@ install on a USB stick.
 
 - It's version 0.1.0. Expect rough edges, and please
   [report them](https://github.com/silocell/OpenMCL-Launcher/issues).
-- Builds are unsigned, so Windows and macOS both warn on first run.
 - Forge below 1.13 uses the old installer format. It's handled, but far less
   tested than modern versions.
 - Installing Forge or NeoForge runs a local patching step that can take a
