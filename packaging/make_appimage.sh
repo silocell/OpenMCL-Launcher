@@ -13,7 +13,15 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ROOT="$PWD"
 APPDIR="$ROOT/dist/OpenMCL.AppDir"
-VERSION="$(python3 -c 'import re,pathlib;print(re.search(r"\"([^\"]+)\"",pathlib.Path("openmcl/__init__.py").read_text()).group(1))')"
+VERSION="$(python3 -c 'import re,pathlib;print(re.search(r"__version__\s*=\s*\"([^\"]+)\"",pathlib.Path("openmcl/__init__.py").read_text()).group(1))')"
+
+# AppStream needs a reverse-DNS component id, and the desktop file, icon and
+# metainfo file are all named after it so software centres match them up.
+APPID="io.github.silocell.OpenMCL"
+
+# A release needs a date to validate. The commit date is accurate and needs no
+# maintenance; today's date is the fallback outside a git checkout.
+RELEASE_DATE="$(git log -1 --format=%cd --date=format:%Y-%m-%d 2>/dev/null || date -u +%Y-%m-%d)"
 
 echo "== Building OpenMCL $VERSION (onedir)"
 rm -rf build dist
@@ -26,48 +34,72 @@ mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/share/applications" \
          "$APPDIR/usr/share/metainfo"
 cp -a dist/OpenMCL/. "$APPDIR/usr/bin/"
 
-cat > "$APPDIR/openmcl.desktop" <<'DESKTOP'
+cat > "$APPDIR/$APPID.desktop" <<DESKTOP
 [Desktop Entry]
 Type=Application
 Name=OpenMCL
 GenericName=Minecraft Launcher
 Comment=Launch Minecraft with isolated instances and mods
 Exec=OpenMCL
-Icon=openmcl
+Icon=$APPID
 Categories=Game;
 Keywords=minecraft;launcher;mods;fabric;forge;
 Terminal=false
 StartupWMClass=OpenMCL
 DESKTOP
-cp "$APPDIR/openmcl.desktop" "$APPDIR/usr/share/applications/openmcl.desktop"
+cp "$APPDIR/$APPID.desktop" "$APPDIR/usr/share/applications/$APPID.desktop"
 
-cp packaging/icons/openmcl.png "$APPDIR/openmcl.png"
+cp packaging/icons/openmcl.png "$APPDIR/$APPID.png"
 cp packaging/icons/openmcl.png \
-   "$APPDIR/usr/share/icons/hicolor/512x512/apps/openmcl.png"
+   "$APPDIR/usr/share/icons/hicolor/512x512/apps/$APPID.png"
 # Some desktops look for .DirIcon rather than reading the .desktop file.
 cp packaging/icons/openmcl.png "$APPDIR/.DirIcon"
 
-cat > "$APPDIR/usr/share/metainfo/openmcl.appdata.xml" <<XML
+cat > "$APPDIR/usr/share/metainfo/$APPID.appdata.xml" <<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>openmcl</id>
+  <id>$APPID</id>
   <name>OpenMCL</name>
-  <summary>Minecraft launcher with isolated instances and mod management</summary>
+  <summary>Launch Minecraft with isolated instances and mods</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-only</project_license>
+  <developer id="io.github.silocell">
+    <name>silocell</name>
+  </developer>
   <description>
     <p>
-      OpenMCL gives each Minecraft setup its own worlds, mods and Java. It
-      installs Fabric, Quilt, NeoForge and Forge, and browses mods from
-      Modrinth and CurseForge. A Microsoft account that owns Minecraft: Java
-      Edition is required.
+      OpenMCL gives each Minecraft setup its own worlds, mods and Java, so
+      updating one never breaks another.
+    </p>
+    <p>
+      It installs the Fabric, Quilt, NeoForge and Forge mod loaders, browses
+      mods from both Modrinth and CurseForge in one search, and imports and
+      exports modpacks.
+    </p>
+    <p>
+      A Microsoft account that owns Minecraft: Java Edition is required. There
+      is no offline mode.
     </p>
   </description>
-  <launchable type="desktop-id">openmcl.desktop</launchable>
+  <launchable type="desktop-id">$APPID.desktop</launchable>
   <url type="homepage">https://silocell.github.io/OpenMCL-Launcher/</url>
-  <releases><release version="$VERSION"/></releases>
+  <url type="bugtracker">https://github.com/silocell/OpenMCL-Launcher/issues</url>
+  <url type="vcs-browser">https://github.com/silocell/OpenMCL-Launcher</url>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="$VERSION" date="$RELEASE_DATE"/>
+  </releases>
 </component>
 XML
+
+if command -v appstreamcli >/dev/null 2>&1; then
+    echo "== Validating AppStream metadata"
+    appstreamcli validate --no-net --pedantic \
+        "$APPDIR/usr/share/metainfo/$APPID.appdata.xml" || {
+        echo "AppStream validation failed; appimagetool would reject this." >&2
+        exit 1
+    }
+fi
 
 cat > "$APPDIR/AppRun" <<'APPRUN'
 #!/bin/sh
