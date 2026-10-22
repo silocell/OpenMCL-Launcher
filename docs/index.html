@@ -139,19 +139,21 @@ code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.9em
 .limits b{color:var(--ink); font-weight:600}
 
 /* ---------- platforms ---------- */
-.plats{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px;
+.plats{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1px;
   background:var(--line); border:1px solid var(--line); border-radius:4px; overflow:hidden}
 .plat{background:var(--bg); padding:26px 24px}
 .plat h3{margin:0 0 4px; font-size:1rem; font-weight:700}
-.plat p{margin:0 0 16px; color:var(--dimmer); font-size:.88rem}
+.plat p{margin:0 0 16px; color:var(--dimmer); font-size:.88rem; min-height:2.4em}
 .plat a{font-weight:600; font-size:.95rem}
-.or{display:block; margin-top:7px; font-size:.84rem; color:var(--dimmer)}
-.or a{font-weight:400; color:var(--dim)}
 
 footer{padding:52px 0 64px; color:var(--dimmer); font-size:.88rem}
 footer p{margin:0 0 10px; max-width:var(--measure)}
 footer a{color:var(--dim)}
 
+@media (max-width:1000px){
+  .plats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .plat p{min-height:0}
+}
 @media (max-width:860px){
   .hero-inner{grid-template-columns:1fr; gap:44px; padding:64px 0 56px}
   .rows,.plats,.os{grid-template-columns:1fr}
@@ -309,6 +311,10 @@ footer a{color:var(--dim)}
       <li><b>CurseForge browsing needs a free key.</b> Modrinth works out of the box.
         Some CurseForge mods block third-party downloads entirely — OpenMCL tells you
         which and links you to the page.</li>
+      <li><b>The portable copy keeps its data with it.</b> Worlds, mods and
+        accounts live in the <code>OpenMCL-Data</code> folder beside the
+        executable, not in your Windows profile. Copy the folder, keep
+        everything.</li>
       <li><b>It's version 0.1.0.</b> Expect rough edges, and
         <a href="https://github.com/silocell/OpenMCL-Launcher/issues">report them</a>.</li>
     </ul>
@@ -318,13 +324,20 @@ footer a{color:var(--dim)}
 <section>
   <div class="wrap band">
     <h2>Get it</h2>
-    <p class="sub">Python isn't needed — each download is self-contained.</p>
+    <p class="sub">Python isn't needed — each download is self-contained. The
+      installer adds a Start menu entry and an uninstaller; the portable copy
+      installs nothing and keeps your worlds in the folder beside it, so it
+      travels on a USB stick.</p>
     <div class="plats">
       <div class="plat">
         <h3>Windows</h3>
         <p>Windows 10 or later, 64-bit</p>
         <a href="https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL-Setup.exe">Installer</a>
-        <span class="or">or <a href="https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL.exe">portable .exe</a></span>
+      </div>
+      <div class="plat">
+        <h3>Windows portable</h3>
+        <p>Runs from a USB stick</p>
+        <a href="https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL-Portable-Windows.zip">Portable .zip</a>
       </div>
       <div class="plat">
         <h3>macOS</h3>

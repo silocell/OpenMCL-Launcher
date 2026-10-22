@@ -78,7 +78,8 @@ class Account:
     access_token: str = ""
     refresh_token: str = ""
     expires_at: float = 0.0
-    xuid: str = ""
+    xuid: str = ""        # Xbox user id, passed to the game as --xuid
+    user_hash: str = ""   # Xbox user hash, used only to build the login token
     skin_url: str = ""
 
     @property
@@ -167,8 +168,8 @@ def refresh_ms_token(client_id: str, refresh_token: str) -> dict:
     return r.json()
 
 
-def _xbox_login(ms_access_token: str) -> tuple[str, str]:
-    """Microsoft token -> (XSTS token, user hash)."""
+def _xbox_login(ms_access_token: str) -> tuple[str, str, str]:
+    """Microsoft token -> (XSTS token, user hash, XUID)."""
     xbl = _post_json(
         XBL_URL,
         {
@@ -202,8 +203,10 @@ def _xbox_login(ms_access_token: str) -> tuple[str, str]:
     if r.status_code >= 400:
         raise AuthError(f"XSTS failed: {r.status_code} {r.text[:300]}")
     xsts = r.json()
-    user_hash = xsts["DisplayClaims"]["xui"][0]["uhs"]
-    return xsts["Token"], user_hash
+    claims = xsts["DisplayClaims"]["xui"][0]
+    # uhs authenticates the Minecraft login call; xid is the account's real
+    # Xbox user id, which the game wants as --xuid. They are not the same.
+    return xsts["Token"], claims["uhs"], claims.get("xid", "")
 
 
 def _minecraft_login(xsts_token: str, user_hash: str) -> dict:
@@ -244,7 +247,7 @@ def _profile(mc_token: str) -> dict:
 
 def _finish(ms_tokens: dict) -> Account:
     """Shared tail of both sign-in and refresh."""
-    xsts_token, user_hash = _xbox_login(ms_tokens["access_token"])
+    xsts_token, user_hash, xuid = _xbox_login(ms_tokens["access_token"])
     mc = _minecraft_login(xsts_token, user_hash)
     mc_token = mc["access_token"]
     _check_entitlement(mc_token)
@@ -267,7 +270,8 @@ def _finish(ms_tokens: dict) -> Account:
         access_token=mc_token,
         refresh_token=ms_tokens.get("refresh_token", ""),
         expires_at=time.time() + int(mc.get("expires_in", 86400)),
-        xuid=user_hash,
+        xuid=xuid,
+        user_hash=user_hash,
         skin_url=skin,
     )
 

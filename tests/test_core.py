@@ -371,6 +371,82 @@ def test_detect_pack_type(tmp_path):
         detect_pack_type(other)
 
 
+# -------------------------------------------------------------------- portable
+
+def test_portable_mode_follows_the_marker(tmp_path, monkeypatch):
+    from openmcl import config
+    monkeypatch.delenv("OPENMCL_HOME", raising=False)
+    monkeypatch.setattr(config, "app_dir", lambda: tmp_path)
+
+    assert config.portable_root() is None
+
+    (tmp_path / config.PORTABLE_MARKER).write_text("portable")
+    assert config.portable_root() == tmp_path / config.PORTABLE_DIR
+    assert config.data_dir() == tmp_path / config.PORTABLE_DIR
+
+
+def test_existing_data_folder_also_means_portable(tmp_path, monkeypatch):
+    """A portable copy keeps working after the marker is deleted by accident."""
+    from openmcl import config
+    monkeypatch.delenv("OPENMCL_HOME", raising=False)
+    monkeypatch.setattr(config, "app_dir", lambda: tmp_path)
+    (tmp_path / config.PORTABLE_DIR).mkdir()
+    assert config.data_dir() == tmp_path / config.PORTABLE_DIR
+
+
+def test_openmcl_home_overrides_portable(tmp_path, monkeypatch):
+    from openmcl import config
+    monkeypatch.setattr(config, "app_dir", lambda: tmp_path)
+    (tmp_path / config.PORTABLE_MARKER).write_text("portable")
+    monkeypatch.setenv("OPENMCL_HOME", str(tmp_path / "elsewhere"))
+    assert config.data_dir() == tmp_path / "elsewhere"
+
+
+# ---------------------------------------------------------------------- auth
+
+def test_xuid_is_the_xbox_id_not_the_user_hash():
+    """--xuid takes xid; uhs only builds the login token. Mixing them is silent."""
+    from openmcl import auth
+
+    captured = {}
+
+    def fake_post(url, payload, headers=None):
+        # Both URLs contain "xbox" - match on the exact endpoint.
+        if url == auth.XBL_URL:
+            return {"Token": "xbl-token"}
+        assert url == auth.MC_LOGIN_URL, url
+        captured["identity"] = payload["identityToken"]
+        return {"access_token": "mc-token", "expires_in": 86400}
+
+    class FakeResponse:
+        status_code = 200
+        @staticmethod
+        def json():
+            return {"Token": "xsts-token",
+                    "DisplayClaims": {"xui": [{"uhs": "HASH123", "xid": "2535XID"}]}}
+
+    class FakeSession:
+        def post(self, *a, **k): return FakeResponse()
+        def get(self, url, **k):
+            class R:
+                status_code = 200
+                @staticmethod
+                def json():
+                    if "entitlement" in url:
+                        return {"items": [{"name": "product_minecraft"}]}
+                    return {"id": "a" * 32, "name": "Steve", "skins": []}
+            return R()
+
+    import openmcl.auth as auth_mod
+    auth_mod.session = lambda: FakeSession()
+    auth_mod._post_json = fake_post
+
+    account = auth_mod._finish({"access_token": "ms", "refresh_token": "r"})
+    assert account.xuid == "2535XID"
+    assert account.user_hash == "HASH123"
+    assert "HASH123" in captured["identity"]
+
+
 # ------------------------------------------------------------------------ java
 
 @pytest.mark.parametrize("raw,major", [

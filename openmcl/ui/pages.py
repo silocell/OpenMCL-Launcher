@@ -1113,8 +1113,14 @@ class SettingsPage(QWidget):
         group = QGroupBox("About")
         layout = QVBoxLayout(group)
         layout.setSpacing(8)
-        version = QLabel(f"OpenMCL {__version__}")
-        folder = QLabel(str(config.DATA))
+        portable = config.portable_root() is not None
+        version = QLabel(
+            f"OpenMCL {__version__}" + ("  ·  portable install" if portable else "")
+        )
+        folder = QLabel(
+            ("Worlds, mods and accounts travel with this folder:\n" if portable
+             else "Worlds, mods and accounts are kept in:\n") + str(config.DATA)
+        )
         folder.setObjectName("Muted")
         folder.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         open_data = QPushButton("Open data folder")

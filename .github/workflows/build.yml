@@ -74,12 +74,24 @@ jobs:
         shell: bash
         run: test -s dist/OpenMCL-Setup.exe && ls -l dist/
 
+      # The portable zip carries the marker file that tells OpenMCL to keep
+      # its data beside the executable instead of in AppData.
+      - name: Build portable zip
+        shell: bash
+        run: |
+          mkdir -p portable
+          cp dist/OpenMCL.exe portable/
+          cp packaging/portable.txt portable/
+          cp packaging/PORTABLE-README.txt "portable/Read me.txt"
+          cd portable && 7z a -tzip ../dist/OpenMCL-Portable-Windows.zip . >/dev/null
+          cd .. && ls -l dist/
+
       - uses: actions/upload-artifact@v4
         with:
           name: OpenMCL-windows
           path: |
             dist/OpenMCL-Setup.exe
-            dist/OpenMCL.exe
+            dist/OpenMCL-Portable-Windows.zip
           if-no-files-found: error
 
   macos:
@@ -170,7 +182,7 @@ jobs:
         with:
           subject-path: |
             release/OpenMCL-Setup.exe
-            release/OpenMCL.exe
+            release/OpenMCL-Portable-Windows.zip
             release/OpenMCL.dmg
             release/OpenMCL-x86_64.AppImage
 
@@ -184,8 +196,8 @@ jobs:
 
             | Platform | File | |
             | --- | --- | --- |
-            | Windows 10+ | `OpenMCL-Setup.exe` | Installer — adds a Start menu entry |
-            | Windows 10+ | `OpenMCL.exe` | Portable — single file, nothing installed |
+            | Windows 10+ | `OpenMCL-Setup.exe` | Installer — Start menu entry, uninstaller |
+            | Windows 10+ | `OpenMCL-Portable-Windows.zip` | Portable — runs from a USB stick, keeps its data with it |
             | macOS 11+ | `OpenMCL.dmg` | Drag to Applications |
             | Linux 64-bit | `OpenMCL-x86_64.AppImage` | `chmod +x`, then run |
 

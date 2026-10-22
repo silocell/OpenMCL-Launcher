@@ -63,6 +63,19 @@ class TaskDialog(QDialog):
         self._worker.start()
         return super().exec()
 
+    def reject(self) -> None:
+        # The worker cannot be stopped mid-download, but it must not emit into
+        # a dialog that is being destroyed.
+        self._detach()
+        super().reject()
+
+    def _detach(self) -> None:
+        for signal in (self._worker.progress, self._worker.done, self._worker.failed):
+            try:
+                signal.disconnect()
+            except (RuntimeError, TypeError):
+                pass
+
     def _on_progress(self, current: int, total: int, label: str) -> None:
         if total > 0:
             self._bar.setRange(0, total)
@@ -76,11 +89,13 @@ class TaskDialog(QDialog):
 
     def _on_done(self, value) -> None:
         self.result_value = value
+        self._detach()
         self.accept()
 
     def _on_failed(self, message: str) -> None:
         self.error = message
-        self.reject()
+        self._detach()
+        super().reject()
 
 
 def run_task(parent, title: str, fn: Callable, *args, wants_progress: bool = True, **kwargs):

@@ -26,7 +26,7 @@ No Python, no setup — each build is self-contained.
 | Platform | Download | How to install |
 | --- | --- | --- |
 | Windows 10+ | [OpenMCL-Setup.exe](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL-Setup.exe) | Installer: Start menu entry, optional desktop shortcut, proper uninstaller. |
-| Windows 10+ | [OpenMCL.exe](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL.exe) | Portable: one file, installs nothing. |
+| Windows 10+ | [OpenMCL-Portable-Windows.zip](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL-Portable-Windows.zip) | Portable: unzip and run. Keeps worlds in the folder beside it. |
 | macOS 11+ | [OpenMCL.dmg](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL.dmg) | Open, drag OpenMCL to Applications. |
 | Linux (64-bit) | [OpenMCL-x86_64.AppImage](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL-x86_64.AppImage) | `chmod +x` it, then run it. |
 
@@ -68,6 +68,12 @@ this.
 The installer puts OpenMCL in your own user folder, so it never asks for an
 administrator password. Uninstalling asks before deleting your worlds and mods
 — answer No and they survive a reinstall.
+
+The portable copy writes nothing outside its own folder: instances, worlds,
+mods, settings and signed-in accounts all live in `OpenMCL-Data` beside the
+executable, so the whole folder can move between machines. That behaviour is
+switched on by the `portable.txt` file in the zip — delete it and OpenMCL
+stores data in `%APPDATA%\OpenMCL` like a normal install.
 
 ## Set up sign-in
 

@@ -1,0 +1,12 @@
+This file makes OpenMCL portable.
+
+While it sits next to OpenMCL.exe, the launcher keeps everything — your
+instances, worlds, mods, settings and signed-in accounts — in the
+OpenMCL-Data folder beside it, rather than in your Windows user profile.
+
+That means you can run OpenMCL from a USB stick on any computer and take
+your worlds with you, leaving nothing behind on the machine.
+
+Delete this file and OpenMCL will store its data in %APPDATA%\OpenMCL like a
+normal installation. (If OpenMCL-Data already exists beside the executable it
+keeps using that, so you won't lose anything by deleting this file.)

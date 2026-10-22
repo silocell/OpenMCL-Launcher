@@ -6,15 +6,48 @@ import os
 import sys
 from dataclasses import dataclass, asdict, field
 from pathlib import Path
+from typing import Optional
 
 APP_NAME = "OpenMCL"
 
 
+PORTABLE_MARKER = "portable.txt"
+PORTABLE_DIR = "OpenMCL-Data"
+
+
+def app_dir() -> Path:
+    """The folder the launcher is running from."""
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parents[1]
+
+
+def portable_root() -> Optional[Path]:
+    """Where a portable install keeps its data, or None if not portable.
+
+    A copy is portable when a file named `portable.txt` sits beside the
+    executable, or when it has already written an `OpenMCL-Data` folder there.
+    That keeps worlds and accounts on the USB stick instead of leaving them
+    behind on whichever computer was used.
+    """
+    base = app_dir()
+    try:
+        if (base / PORTABLE_MARKER).is_file() or (base / PORTABLE_DIR).is_dir():
+            return base / PORTABLE_DIR
+    except OSError:
+        pass
+    return None
+
+
 def data_dir() -> Path:
-    """Per-platform application data directory."""
+    """Where settings, accounts and instances live."""
     env = os.environ.get("OPENMCL_HOME")
     if env:
         return Path(env).expanduser()
+
+    portable = portable_root()
+    if portable is not None:
+        return portable
     if sys.platform == "win32":
         base = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming"))
         return base / APP_NAME
