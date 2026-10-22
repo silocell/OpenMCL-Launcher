@@ -3,7 +3,10 @@
 ; Built with NSIS (makensis). The compiler runs on Linux as well as Windows,
 ; so this is checked on every build rather than only on release.
 ;
-;   makensis -DVERSION=0.1.0 -DSOURCE_EXE=../dist/OpenMCL.exe packaging/installer.nsi
+;   cd packaging && makensis installer.nsi
+;
+; The version is read from openmcl/__init__.py automatically. Override it with
+; -DVERSION=x.y.z and the source binary with -DSOURCE_EXE=path if needed.
 
 Unicode true
 
@@ -15,8 +18,14 @@ Unicode true
 !define ABOUTURL       "https://github.com/silocell/OpenMCL-Launcher"
 !define REGKEY         "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APPNAME}"
 
+; Read the version straight out of the source rather than taking it on the
+; command line: passing it through a shell meant quoting it correctly in bash,
+; PowerShell and cmd, and getting that wrong broke the build twice.
 !ifndef VERSION
-  !define VERSION "0.0.0"
+  !searchparse /file "..\openmcl\__init__.py" '__version__ = "' VERSION '"'
+!endif
+!ifndef VERSION
+  !error "Could not read __version__ from openmcl/__init__.py"
 !endif
 !ifndef SOURCE_EXE
   !define SOURCE_EXE "..\dist\OpenMCL.exe"

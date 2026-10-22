@@ -51,11 +51,6 @@ jobs:
       - name: Smoke test
         run: dist/OpenMCL.exe --version
 
-      - name: Read version
-        id: ver
-        shell: bash
-        run: echo "version=$(python packaging/version.py)" >> "$GITHUB_OUTPUT"
-
       # NSIS ships on the runner image, but it isn't on PATH and the image
       # contents change over time, so find it or install it.
       - name: Ensure NSIS is available
@@ -69,9 +64,11 @@ jobs:
           Add-Content -Path $env:GITHUB_PATH -Value $nsis
           Write-Host "using $nsis"
 
+      # The version comes from openmcl/__init__.py via !searchparse inside the
+      # script, so nothing has to be quoted through a shell here.
       - name: Build installer
         working-directory: packaging
-        run: makensis -V2 -DVERSION=${{ steps.ver.outputs.version }} installer.nsi
+        run: makensis -V3 installer.nsi
 
       - name: Check the installer was produced
         shell: bash
