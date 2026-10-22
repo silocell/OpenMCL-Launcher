@@ -47,12 +47,44 @@ jobs:
           pip install -r requirements.txt pyinstaller
       - name: Build
         run: python -m PyInstaller openmcl.spec --noconfirm
+
       - name: Smoke test
         run: dist/OpenMCL.exe --version
+
+      - name: Read version
+        id: ver
+        shell: bash
+        run: |
+          v=$(python -c "import re,pathlib;print(re.search(r'__version__\s*=\s*"([^"]+)"',pathlib.Path('openmcl/__init__.py').read_text()).group(1))")
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+      # NSIS ships on the runner image, but it isn't on PATH and the image
+      # contents change over time, so find it or install it.
+      - name: Ensure NSIS is available
+        shell: pwsh
+        run: |
+          $nsis = "C:\Program Files (x86)\NSIS"
+          if (-not (Test-Path "$nsis\makensis.exe")) {
+            Write-Host "NSIS not found, installing"
+            choco install nsis -y --no-progress
+          }
+          Add-Content -Path $env:GITHUB_PATH -Value $nsis
+          Write-Host "using $nsis"
+
+      - name: Build installer
+        working-directory: packaging
+        run: makensis -V2 -DVERSION=${{ steps.ver.outputs.version }} installer.nsi
+
+      - name: Check the installer was produced
+        shell: bash
+        run: test -s dist/OpenMCL-Setup.exe && ls -l dist/
+
       - uses: actions/upload-artifact@v4
         with:
           name: OpenMCL-windows
-          path: dist/OpenMCL.exe
+          path: |
+            dist/OpenMCL-Setup.exe
+            dist/OpenMCL.exe
           if-no-files-found: error
 
   macos:
@@ -142,6 +174,7 @@ jobs:
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: |
+            release/OpenMCL-Setup.exe
             release/OpenMCL.exe
             release/OpenMCL.dmg
             release/OpenMCL-x86_64.AppImage
@@ -154,11 +187,12 @@ jobs:
           body: |
             ## Downloads
 
-            | Platform | File |
-            | --- | --- |
-            | Windows 10+ | `OpenMCL.exe` |
-            | macOS 11+ | `OpenMCL.dmg` |
-            | Linux 64-bit | `OpenMCL-x86_64.AppImage` |
+            | Platform | File | |
+            | --- | --- | --- |
+            | Windows 10+ | `OpenMCL-Setup.exe` | Installer — adds a Start menu entry |
+            | Windows 10+ | `OpenMCL.exe` | Portable — single file, nothing installed |
+            | macOS 11+ | `OpenMCL.dmg` | Drag to Applications |
+            | Linux 64-bit | `OpenMCL-x86_64.AppImage` | `chmod +x`, then run |
 
             **Windows will say "Windows protected your PC".** The build isn't
             code-signed. Choose **More info**, then **Run anyway**.

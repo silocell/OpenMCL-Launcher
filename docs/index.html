@@ -145,6 +145,8 @@ code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-size:.9em
 .plat h3{margin:0 0 4px; font-size:1rem; font-weight:700}
 .plat p{margin:0 0 16px; color:var(--dimmer); font-size:.88rem}
 .plat a{font-weight:600; font-size:.95rem}
+.or{display:block; margin-top:7px; font-size:.84rem; color:var(--dimmer)}
+.or a{font-weight:400; color:var(--dim)}
 
 footer{padding:52px 0 64px; color:var(--dimmer); font-size:.88rem}
 footer p{margin:0 0 10px; max-width:var(--measure)}
@@ -321,7 +323,8 @@ footer a{color:var(--dim)}
       <div class="plat">
         <h3>Windows</h3>
         <p>Windows 10 or later, 64-bit</p>
-        <a href="https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL.exe">OpenMCL.exe</a>
+        <a href="https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL-Setup.exe">Installer</a>
+        <span class="or">or <a href="https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL.exe">portable .exe</a></span>
       </div>
       <div class="plat">
         <h3>macOS</h3>
@@ -350,7 +353,7 @@ footer a{color:var(--dim)}
 (function () {
   var base = "https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/";
   var builds = {
-    win:   { label: "Download for Windows", meta: "OpenMCL.exe · 48 MB",   file: "OpenMCL.exe" },
+    win:   { label: "Download for Windows", meta: "Installer · 48 MB",     file: "OpenMCL-Setup.exe" },
     mac:   { label: "Download for macOS",   meta: "OpenMCL.dmg · 72 MB",   file: "OpenMCL.dmg" },
     linux: { label: "Download for Linux",   meta: "AppImage · 68 MB",      file: "OpenMCL-x86_64.AppImage" }
   };

@@ -25,7 +25,8 @@ No Python, no setup — each build is self-contained.
 
 | Platform | Download | How to install |
 | --- | --- | --- |
-| Windows 10+ | [OpenMCL.exe](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL.exe) | Run it. Nothing to install. |
+| Windows 10+ | [OpenMCL-Setup.exe](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL-Setup.exe) | Installer: Start menu entry, optional desktop shortcut, proper uninstaller. |
+| Windows 10+ | [OpenMCL.exe](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL.exe) | Portable: one file, installs nothing. |
 | macOS 11+ | [OpenMCL.dmg](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL.dmg) | Open, drag OpenMCL to Applications. |
 | Linux (64-bit) | [OpenMCL-x86_64.AppImage](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL-x86_64.AppImage) | `chmod +x` it, then run it. |
 
@@ -60,9 +61,13 @@ gh attestation verify OpenMCL.exe --repo silocell/OpenMCL-Launcher
 
 Checksums for every file ship with each release in `SHA256SUMS`.
 
-On Windows the single-file build unpacks itself on each launch, so the first
-window takes a few seconds to appear. That's normal. The macOS and Linux
-packages don't do this.
+The Windows builds unpack themselves on each launch, so the first window takes
+a few seconds to appear. That's normal. The macOS and Linux packages don't do
+this.
+
+The installer puts OpenMCL in your own user folder, so it never asks for an
+administrator password. Uninstalling asks before deleting your worlds and mods
+— answer No and they survive a reinstall.
 
 ## Set up sign-in
 
