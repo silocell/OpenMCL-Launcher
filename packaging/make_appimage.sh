@@ -13,7 +13,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ROOT="$PWD"
 APPDIR="$ROOT/dist/OpenMCL.AppDir"
-VERSION="$(python3 -c 'import re,pathlib;print(re.search(r"__version__\s*=\s*\"([^\"]+)\"",pathlib.Path("openmcl/__init__.py").read_text()).group(1))')"
+VERSION="$(python3 packaging/version.py)"
 
 # AppStream needs a reverse-DNS component id, and the desktop file, icon and
 # metainfo file are all named after it so software centres match them up.

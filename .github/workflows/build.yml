@@ -54,9 +54,7 @@ jobs:
       - name: Read version
         id: ver
         shell: bash
-        run: |
-          v=$(python -c "import re,pathlib;print(re.search(r'__version__\s*=\s*"([^"]+)"',pathlib.Path('openmcl/__init__.py').read_text()).group(1))")
-          echo "version=$v" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(python packaging/version.py)" >> "$GITHUB_OUTPUT"
 
       # NSIS ships on the runner image, but it isn't on PATH and the image
       # contents change over time, so find it or install it.
