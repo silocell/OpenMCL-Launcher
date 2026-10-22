@@ -37,10 +37,18 @@ you run it on.
 ## 3. On macOS or Linux
 
 ```bash
-packaging/build.sh
+packaging/build.sh          # raw .app or binary
+packaging/make_dmg.sh       # macOS: dist/OpenMCL.dmg
+packaging/make_appimage.sh  # Linux: dist/OpenMCL-x86_64.AppImage
 ```
 
-Produces `dist/OpenMCL.app` or `dist/OpenMCL`.
+`make_dmg.sh` builds the app if it isn't there already, stages it beside an
+Applications symlink, and compresses the result with `hdiutil`. macOS only.
+
+`make_appimage.sh` builds a `--onedir` version on purpose: an AppImage already
+mounts itself as a filesystem, so a single-file binary inside would unpack a
+second time on every launch. It downloads `appimagetool` once into `build/`.
+Linux only, and it needs network access the first time.
 
 ## One file or one folder?
 

@@ -219,8 +219,8 @@ footer a{color:var(--dim)}
         and there won't be one.</li>
       <li><b>Windows will warn you.</b> The build isn't code-signed, so SmartScreen shows
         “Windows protected your PC”. Choose More info, then Run anyway.</li>
-      <li><b>First launch is slow.</b> The single-file build unpacks itself each time it
-        starts. Build the folder version if that bothers you.</li>
+      <li><b>First launch is slow on Windows.</b> The single-file build unpacks
+        itself each time it starts, so the window takes a few seconds to appear.</li>
       <li><b>CurseForge browsing needs a free key.</b> Modrinth works out of the box.
         Some CurseForge mods block third-party downloads entirely — OpenMCL tells you
         which and links you to the page.</li>
@@ -243,12 +243,12 @@ footer a{color:var(--dim)}
       <div class="plat">
         <h3>macOS</h3>
         <p>macOS 11 or later</p>
-        <a href="https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL-macos.zip">OpenMCL.app</a>
+        <a href="https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL.dmg">OpenMCL.dmg</a>
       </div>
       <div class="plat">
         <h3>Linux</h3>
-        <p>64-bit, glibc 2.35 or later</p>
-        <a href="https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL">OpenMCL</a>
+        <p>64-bit, most distributions</p>
+        <a href="https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL-x86_64.AppImage">AppImage</a>
       </div>
     </div>
   </div>
@@ -267,9 +267,9 @@ footer a{color:var(--dim)}
 (function () {
   var base = "https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/";
   var builds = {
-    win:   { label: "Download for Windows", meta: "OpenMCL.exe · 48 MB", file: "OpenMCL.exe" },
-    mac:   { label: "Download for macOS",   meta: "OpenMCL.app · 72 MB", file: "OpenMCL-macos.zip" },
-    linux: { label: "Download for Linux",   meta: "OpenMCL · 78 MB",     file: "OpenMCL" }
+    win:   { label: "Download for Windows", meta: "OpenMCL.exe · 48 MB",   file: "OpenMCL.exe" },
+    mac:   { label: "Download for macOS",   meta: "OpenMCL.dmg · 72 MB",   file: "OpenMCL.dmg" },
+    linux: { label: "Download for Linux",   meta: "AppImage · 68 MB",      file: "OpenMCL-x86_64.AppImage" }
   };
 
   var ua = (navigator.userAgentData && navigator.userAgentData.platform) ||

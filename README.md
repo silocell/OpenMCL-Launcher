@@ -23,11 +23,11 @@ search.
 
 No Python, no setup — each build is self-contained.
 
-| Platform | File | Notes |
+| Platform | Download | How to install |
 | --- | --- | --- |
-| Windows 10+ (64-bit) | [OpenMCL.exe](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL.exe) | SmartScreen will warn; see below |
-| macOS 11+ | [OpenMCL.app](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL-macos.zip) | Right-click → Open on first run |
-| Linux (glibc 2.35+) | [OpenMCL](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL) | `chmod +x OpenMCL` first |
+| Windows 10+ | [OpenMCL.exe](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL.exe) | Run it. Nothing to install. |
+| macOS 11+ | [OpenMCL.dmg](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL.dmg) | Open, drag OpenMCL to Applications. |
+| Linux (64-bit) | [OpenMCL-x86_64.AppImage](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL-x86_64.AppImage) | `chmod +x` it, then run it. |
 
 You need a Microsoft account that owns **Minecraft: Java Edition**. OpenMCL
 checks that it does and won't launch otherwise. There is no offline or cracked
@@ -40,8 +40,9 @@ code-signed. Choose *More info* → *Run anyway*.
 
 **macOS** blocks it for the same reason. Right-click the app → *Open* → *Open*.
 
-The single-file builds unpack themselves on each launch, so the first window
-takes five to ten seconds to appear. That's normal.
+On Windows the single-file build unpacks itself on each launch, so the first
+window takes a few seconds to appear. That's normal. The macOS and Linux
+packages don't do this.
 
 ## Set up sign-in
 
