@@ -201,11 +201,18 @@ jobs:
             release/OpenMCL.dmg
             release/OpenMCL-x86_64.AppImage
 
+      # draft: false publishes a release that was created as a draft, so the
+      # recommended flow is to create the release as a DRAFT and let this step
+      # publish it once the files are attached. Publishing first moves
+      # /releases/latest/ to an empty release and every download 404s until
+      # the build finishes.
       - uses: softprops/action-gh-release@v2
         with:
           files: release/*
           generate_release_notes: true
           fail_on_unmatched_files: true
+          draft: false
+          make_latest: true
           body: |
             ## Downloads
 
