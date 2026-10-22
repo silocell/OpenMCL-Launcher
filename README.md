@@ -98,9 +98,16 @@ Then **Accounts → Add account**. OpenMCL shows a short code; approve it at
 `microsoft.com/link` with the account that owns the game. Your password is
 never typed into the launcher.
 
-> **If sign-in returns a 403**, your new application hasn't been approved for
-> the Minecraft API yet. Apply at <https://aka.ms/mce-reviewappid>. Newly
-> registered applications need this before Minecraft will accept them.
+> **"Microsoft has not approved this application for Minecraft yet"**
+>
+> This is the usual first-run result, and it is not a fault in the launcher.
+> Microsoft, Xbox Live and the security check all accept your sign-in; only
+> Minecraft Services refuses, with `Invalid app registration`, because newly
+> registered applications must be approved before they can sign players in.
+>
+> Apply at <https://aka.ms/mce-reviewappid> with your Application (client) ID.
+> Until Microsoft replies there is nothing to change — the launcher is working
+> correctly and so is your app registration.
 
 ### CurseForge (optional)
 

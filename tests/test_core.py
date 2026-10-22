@@ -412,39 +412,47 @@ def test_xuid_is_the_xbox_id_not_the_user_hash():
 
     def fake_post(url, payload, headers=None):
         # Both URLs contain "xbox" - match on the exact endpoint.
-        if url == auth.XBL_URL:
-            return {"Token": "xbl-token"}
-        assert url == auth.MC_LOGIN_URL, url
-        captured["identity"] = payload["identityToken"]
-        return {"access_token": "mc-token", "expires_in": 86400}
-
-    class FakeResponse:
-        status_code = 200
-        @staticmethod
-        def json():
-            return {"Token": "xsts-token",
-                    "DisplayClaims": {"xui": [{"uhs": "HASH123", "xid": "2535XID"}]}}
+        assert url == auth.XBL_URL, url
+        return {"Token": "xbl-token"}
 
     class FakeSession:
-        def post(self, *a, **k): return FakeResponse()
-        def get(self, url, **k):
-            class R:
-                status_code = 200
-                @staticmethod
-                def json():
-                    if "entitlement" in url:
-                        return {"items": [{"name": "product_minecraft"}]}
-                    return {"id": "a" * 32, "name": "Steve", "skins": []}
-            return R()
+        def post(self, url, **kw):
+            if url == auth.XSTS_URL:
+                return _Resp(200, {
+                    "Token": "xsts-token",
+                    "DisplayClaims": {"xui": [{"uhs": "HASH123", "xid": "2535XID"}]},
+                })
+            if url == auth.MC_LOGIN_URL:
+                captured["identity"] = kw["json"]["identityToken"]
+                return _Resp(200, {"access_token": "mc-token", "expires_in": 86400})
+            raise AssertionError(f"unexpected post to {url}")
 
-    import openmcl.auth as auth_mod
-    auth_mod.session = lambda: FakeSession()
-    auth_mod._post_json = fake_post
+        def get(self, url, **kw):
+            if "entitlement" in url:
+                return _Resp(200, {"items": [{"name": "product_minecraft"}]})
+            return _Resp(200, {"id": "a" * 32, "name": "Steve", "skins": []})
 
-    account = auth_mod._finish({"access_token": "ms", "refresh_token": "r"})
+    class _Resp:
+        def __init__(self, status, payload):
+            self.status_code = status
+            self._payload = payload
+            self.text = ""
+
+        def json(self):
+            return self._payload
+
+    original_session, original_post = auth.session, auth._post_json
+    auth.session = lambda: FakeSession()
+    auth._post_json = fake_post
+    try:
+        account = auth._finish({"access_token": "ms", "refresh_token": "r"})
+    finally:
+        auth.session, auth._post_json = original_session, original_post
+
     assert account.xuid == "2535XID"
     assert account.user_hash == "HASH123"
     assert "HASH123" in captured["identity"]
+    assert "xsts-token" in captured["identity"]
 
 
 # ------------------------------------------------------------------------ java
@@ -701,3 +709,30 @@ def test_a_dropped_worker_is_not_collected_while_running():
             break
         time.sleep(0.01)
     assert not _live, "finished worker was never released"
+
+
+def test_unapproved_app_gets_a_plain_english_message():
+    """The raw 403 reads like the launcher is broken. It is not."""
+    from openmcl import auth
+
+    class Refused:
+        status_code = 403
+        text = ('{"path":"/authentication/login_with_xbox","errorMessage":'
+                '"Invalid app registration, see https://aka.ms/AppRegInfo"}')
+
+    class FakeSession:
+        def post(self, *a, **k):
+            return Refused()
+
+    original = auth.session
+    auth.session = lambda: FakeSession()
+    try:
+        with pytest.raises(auth.AuthError) as caught:
+            auth._minecraft_login("xsts", "hash")
+    finally:
+        auth.session = original
+
+    message = str(caught.value)
+    assert "approved" in message.lower()
+    assert "aka.ms/mce-reviewappid" in message
+    assert "nothing to fix in the launcher" in message.lower()

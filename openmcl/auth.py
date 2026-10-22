@@ -210,9 +210,28 @@ def _xbox_login(ms_access_token: str) -> tuple[str, str, str]:
 
 
 def _minecraft_login(xsts_token: str, user_hash: str) -> dict:
-    return _post_json(
-        MC_LOGIN_URL, {"identityToken": f"XBL3.0 x={user_hash};{xsts_token}"}
+    r = session().post(
+        MC_LOGIN_URL,
+        json={"identityToken": f"XBL3.0 x={user_hash};{xsts_token}"},
+        headers={"Content-Type": "application/json", "Accept": "application/json"},
+        timeout=30,
     )
+    # By far the most common first-run failure, and the raw response is
+    # unhelpful: everything before this step succeeded, so it reads as if the
+    # launcher is broken when the application simply has not been approved.
+    if r.status_code == 403 and "Invalid app registration" in r.text:
+        raise AuthError(
+            "Microsoft has not approved this application for Minecraft yet.\n\n"
+            "Your sign-in worked -- Microsoft, Xbox Live and the security check "
+            "all accepted it. Only Minecraft itself refused, because new "
+            "applications must be approved before they can sign players in.\n\n"
+            "Apply at https://aka.ms/mce-reviewappid using the Application "
+            "(client) ID from Settings, then try again once Microsoft replies. "
+            "There is nothing to fix in the launcher."
+        )
+    if r.status_code >= 400:
+        raise AuthError(f"Minecraft refused the sign-in ({r.status_code}): {r.text[:300]}")
+    return r.json()
 
 
 def _check_entitlement(mc_token: str) -> None:
