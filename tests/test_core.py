@@ -602,3 +602,59 @@ def test_one_version_everywhere():
 
     nsi = (root / "packaging" / "installer.nsi").read_text()
     assert "!searchparse" in nsi, "installer should read the version from source"
+
+
+# ----------------------------------------------------- downloads match builds
+
+def _release_files() -> set[str]:
+    from pathlib import Path
+    text = (Path(__file__).resolve().parents[1]
+            / "packaging" / "release_files.txt").read_text()
+    return {
+        line.strip() for line in text.splitlines()
+        if line.strip() and not line.startswith("#")
+    }
+
+
+def test_every_download_link_names_a_file_the_build_produces():
+    """v0.1.0 shipped filenames the site didn't link to, so every link 404'd.
+
+    The links resolve through /releases/latest/, so a mismatch is invisible
+    until a release is published and someone clicks.
+    """
+    import re
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    expected = _release_files()
+    assert expected, "release_files.txt is empty"
+
+    pattern = re.compile(r"releases/latest/download/([A-Za-z0-9._-]+)")
+    checked = 0
+    for page in (root / "docs" / "index.html", root / "README.md"):
+        for name in pattern.findall(page.read_text("utf-8")):
+            checked += 1
+            assert name in expected, (
+                f"{page.name} offers {name}, which no release contains. "
+                f"Released files are: {sorted(expected)}"
+            )
+    assert checked, "no download links found to check"
+
+
+def test_the_workflow_builds_every_released_file():
+    from pathlib import Path
+
+    workflow = (Path(__file__).resolve().parents[1]
+                / ".github" / "workflows" / "build.yml").read_text("utf-8")
+    for name in _release_files():
+        assert name in workflow, f"nothing in the build workflow produces {name}"
+
+
+def test_the_link_guard_actually_catches_a_mismatch(tmp_path, monkeypatch):
+    """A guard that cannot fail is not a guard."""
+    import re
+    expected = {"OpenMCL-Setup.exe"}
+    page = 'href="https://github.com/x/y/releases/latest/download/OpenMCL.exe"'
+    found = re.compile(r"releases/latest/download/([A-Za-z0-9._-]+)").findall(page)
+    assert found == ["OpenMCL.exe"]
+    assert found[0] not in expected

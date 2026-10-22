@@ -161,6 +161,7 @@ jobs:
       id-token: write
       attestations: write
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           path: artifacts
@@ -170,6 +171,20 @@ jobs:
           mkdir -p release
           find artifacts -type f -exec mv {} release/ ";"
           ls -lh release
+
+      # Catches the other half of the problem: a release that is missing a
+      # file the website offers.
+      - name: Check every expected file is here
+        run: |
+          missing=0
+          while read -r name; do
+            case "$name" in ''|'#'*) continue ;; esac
+            if [ ! -s "release/$name" ]; then
+              echo "::error::release is missing $name"
+              missing=1
+            fi
+          done < packaging/release_files.txt
+          exit $missing
 
       - name: Write checksums
         working-directory: release

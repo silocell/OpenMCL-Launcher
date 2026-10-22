@@ -1,0 +1,14 @@
+# The files every release must contain, one per line.
+#
+# Two things check this list, from opposite directions:
+#   - tests/test_core.py asserts every download link on the website and in the
+#     README points at a file named here, so a link can't outrun the build.
+#   - the release job asserts each of these was actually produced before it
+#     publishes, so a release can't go out missing one.
+#
+# Adding a download means adding it here, to the workflow that builds it, and
+# to the pages that link to it. The tests will tell you if you miss one.
+OpenMCL-Setup.exe
+OpenMCL-Portable-Windows.zip
+OpenMCL.dmg
+OpenMCL-x86_64.AppImage
