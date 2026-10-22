@@ -15,6 +15,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,75..125,400..800;1,75..125,400&display=swap" rel="stylesheet">
 <style>
 :root{
+  /* Tells the browser the page is dark, so scrollbars, form controls,
+     text selection and the flash before CSS loads all follow suit. */
+  color-scheme: dark;
   --bg:#0e1311; --surface:#161c19; --raised:#1d2521;
   --line:#243029; --line-soft:#1b231f;
   --ink:#e8ede9; --dim:#8fa096; --dimmer:#67756c;
@@ -23,6 +26,8 @@
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
+::selection{background:var(--moss-deep); color:#fff}
+html{background:var(--bg)}
 body{
   margin:0; background:var(--bg); color:var(--ink);
   font-family:"Archivo",system-ui,sans-serif;
