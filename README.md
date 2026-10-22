@@ -1,176 +1,184 @@
+<div align="center">
+
 # OpenMCL
 
-A Minecraft launcher in the Prism/MultiMC mould: isolated instances, Fabric /
-Quilt / NeoForge / Forge, a built-in Modrinth and CurseForge browser, modpack
-import, and a themeable interface. Sign-in is real Microsoft OAuth against a
-Microsoft account that owns Minecraft: Java Edition.
+**Keep every Minecraft pack in its own box.**
 
-![Instances](docs/shot-instances.png)
+Each setup gets its own worlds, mods and Java, so updating one never breaks
+another. Four mod loaders, installed for you. Modrinth and CurseForge in one
+search.
+
+[**Download**](https://github.com/silocell/OpenMCL-Launcher/releases/latest) ·
+[Website](https://silocell.github.io/OpenMCL-Launcher/) ·
+[Report a problem](https://github.com/silocell/OpenMCL-Launcher/issues)
+
+[![Build](https://github.com/silocell/OpenMCL-Launcher/actions/workflows/build.yml/badge.svg)](https://github.com/silocell/OpenMCL-Launcher/actions/workflows/build.yml)
+[![License: GPL v3](https://img.shields.io/badge/licence-GPL--3.0-5fa87a.svg)](LICENSE)
+
+![The OpenMCL instances screen](docs/shot-instances.png)
+
+</div>
+
+## Download
+
+No Python, no setup — each build is self-contained.
+
+| Platform | File | Notes |
+| --- | --- | --- |
+| Windows 10+ (64-bit) | [OpenMCL.exe](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL.exe) | SmartScreen will warn; see below |
+| macOS 11+ | [OpenMCL.app](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL-macos.zip) | Right-click → Open on first run |
+| Linux (glibc 2.35+) | [OpenMCL](https://github.com/silocell/OpenMCL-Launcher/releases/latest/download/OpenMCL) | `chmod +x OpenMCL` first |
+
+You need a Microsoft account that owns **Minecraft: Java Edition**. OpenMCL
+checks that it does and won't launch otherwise. There is no offline or cracked
+mode, and there won't be one.
+
+### First run
+
+**Windows** shows “Windows protected your PC”, because the build isn't
+code-signed. Choose *More info* → *Run anyway*.
+
+**macOS** blocks it for the same reason. Right-click the app → *Open* → *Open*.
+
+The single-file builds unpack themselves on each launch, so the first window
+takes five to ten seconds to appear. That's normal.
+
+## Set up sign-in
+
+This is the one fiddly part, and it is Mojang's rule rather than a choice:
+**Minecraft only accepts sign-ins from registered applications**, so no
+third-party launcher can ship with a sign-in key of its own. You register a
+free Microsoft application once and paste its ID into Settings.
+
+1. Go to the [Azure portal](https://portal.azure.com/) and sign in with any
+   Microsoft account.
+2. **Microsoft Entra ID → App registrations → New registration**.
+3. Name it anything. Under *Supported account types* choose one that includes
+   **personal Microsoft accounts**. Leave **Redirect URI empty** — the
+   device-code flow doesn't use one.
+4. Click **Register**, then copy the **Application (client) ID** from the
+   Overview page. It looks like `3f8a1b2c-4d5e-6f70-8a9b-0c1d2e3f4a5b`.
+5. Open **Authentication**, scroll to *Advanced settings*, set **Allow public
+   client flows** to **Yes**, and **Save**. Without this, sign-in is rejected.
+6. In OpenMCL: **Settings → Microsoft client ID**, paste, **Save**.
+
+Then **Accounts → Add account**. OpenMCL shows a short code; approve it at
+`microsoft.com/link` with the account that owns the game. Your password is
+never typed into the launcher.
+
+> **If sign-in returns a 403**, your new application hasn't been approved for
+> the Minecraft API yet. Apply at <https://aka.ms/mce-reviewappid>. Newly
+> registered applications need this before Minecraft will accept them.
+
+### CurseForge (optional)
+
+Modrinth works immediately. To browse CurseForge as well, get a free key from
+the [CurseForge console](https://console.curseforge.com/) and paste it into
+**Settings → CurseForge key**. Using it means accepting CurseForge's
+[third-party API terms](https://support.curseforge.com/en/support/solutions/articles/9000207405).
+
+Some CurseForge projects block third-party downloads entirely. No launcher can
+fetch those; OpenMCL names them and links you to the page so you can download
+the jar yourself and drop it in the instance's mods folder.
 
 ## What it does
 
-**Instances** — each one is a self-contained `.minecraft` with its own worlds,
-mods, configs, Java path, memory and window settings. Duplicate them, export
-them, delete them without touching anything else. Versions, libraries and
-assets are shared between instances, so a second instance on the same version
+**Instances stay separate.** Each one is a complete `.minecraft` with its own
+worlds, mods, configs, Java path, memory and window settings. Duplicate,
+export or delete one without touching the others. Versions, libraries and
+assets are shared behind the scenes, so a second instance on the same version
 downloads nothing.
 
-**Accounts** — Microsoft device-code sign-in: the launcher shows a code, you
-approve it on Microsoft's own page, and no password is ever typed into this
-app. Tokens refresh automatically before a launch. Entitlement and profile are
-both verified. There is no offline/cracked mode and there won't be one.
+**Four loaders, installed for you.** Fabric and Quilt come from their own
+metadata APIs. NeoForge and Forge download the official installer and run its
+patching step locally — the same work the official installer does.
 
-**Loaders** — Fabric and Quilt install from their own metadata APIs. NeoForge
-and Forge are installed by downloading the official installer and running its
-processors locally, the same work the official installer does, so patched jars
-end up where the loader expects them.
+**Mods from both places at once.** Search Modrinth and CurseForge side by
+side, filtered to the version and loader you're actually running. Required
+dependencies install alongside. *Check for updates* compares every tracked mod
+against its newest build. Jars you drop in by hand appear in the list too, and
+can be enabled, disabled or removed like any other.
 
-**Mods** — search Modrinth and CurseForge side by side, filtered to the
-instance's Minecraft version and loader. Installing a mod pulls its required
-dependencies too. "Check for updates" compares every tracked mod against the
-newest build. Mods added to the folder by hand show up in the list and can be
-enabled, disabled or removed like any other.
+**Modpacks in and out.** Import `.mrpack` and CurseForge `.zip` packs — the
+instance, loader, files and overrides are all set up for you. Export any
+instance back out as a `.mrpack` to share it.
 
-**Modpacks** — import `.mrpack` (Modrinth) and CurseForge `.zip` packs, which
-creates the instance, installs the right loader, downloads the files and
-applies the overrides. Export an instance back out as a `.mrpack`.
+**Make it yours.** Three themes, any accent colour, adjustable text size, and
+per-instance overrides for Java, memory, JVM arguments and window size.
 
-**Appearance** — three themes, any accent colour, adjustable font size.
+## Where your files live
 
-## Requirements
+| | |
+| --- | --- |
+| Windows | `%APPDATA%\OpenMCL` |
+| macOS | `~/Library/Application Support/OpenMCL` |
+| Linux | `~/.local/share/openmcl` |
 
-- Python 3.10+
-- A Java runtime. The launcher finds installed ones (`JAVA_HOME`, `PATH`,
-  the usual install directories, and runtimes the official launcher installed)
-  and picks the one the chosen Minecraft version asks for. Modern versions
-  want Java 21; 1.17–1.20.4 want 17; older ones want 8.
-- A Microsoft account that owns Minecraft: Java Edition.
+Worlds and mods sit under `instances/<name>/minecraft/`. Game versions,
+libraries and assets are shared in `shared/`. Set the `OPENMCL_HOME`
+environment variable to put everything somewhere else — useful for a portable
+install on a USB stick.
 
-## Install and run
+## Known limits
+
+- It's version 0.1.0. Expect rough edges, and please
+  [report them](https://github.com/silocell/OpenMCL-Launcher/issues).
+- Builds are unsigned, so Windows and macOS both warn on first run.
+- Forge below 1.13 uses the old installer format. It's handled, but far less
+  tested than modern versions.
+- Installing Forge or NeoForge runs a local patching step that can take a
+  minute or two the first time. Reinstalling skips work already done.
+- CurseForge search stops at 10,000 results, which is their API limit.
+
+## Running from source
+
+Needs Python 3.10+ and a Java runtime. OpenMCL finds installed Java itself
+(`JAVA_HOME`, `PATH`, the usual install directories, and runtimes the official
+launcher installed) and picks the version each Minecraft release asks for.
 
 ```bash
+git clone https://github.com/silocell/OpenMCL-Launcher
+cd OpenMCL-Launcher
 pip install -r requirements.txt
 python run.py
 ```
 
-On first run, open **Settings** and fill in the Microsoft client ID below.
-
-## Building a standalone executable
-
-To get an `OpenMCL.exe` that runs without Python installed:
-
-| You have | Do this | Result |
-| --- | --- | --- |
-| A Windows machine | `packaging\build_windows.bat` | `dist\OpenMCL.exe` |
-| macOS or Linux | `packaging/build.sh` | `dist/OpenMCL.app` or `dist/OpenMCL` |
-| Neither, or you want all three | Push to GitHub; the included Actions workflow builds Windows, macOS and Linux and attaches them to the run | download from *Actions → Artifacts* |
-
-PyInstaller cannot cross-compile, so a Windows executable has to be built on
-Windows — the GitHub Actions route exists precisely because it gives you a
-Windows runner for free. Full details, including the one-file vs one-folder
-trade-off and what to expect from unsigned binaries, are in
-[`packaging/README.md`](packaging/README.md).
+Building your own executable is covered in
+[`packaging/README.md`](packaging/README.md) — one script per platform, plus a
+GitHub Actions workflow that builds all three.
 
 Any build can be checked without signing in:
 
 ```bash
-dist/OpenMCL --version
-dist/OpenMCL --selftest    # builds every page, verifies bundled assets, exits
+OpenMCL --version
+OpenMCL --selftest    # builds every page, verifies bundled assets, exits
 ```
 
-## Microsoft sign-in setup
+## Contributing
 
-Minecraft's auth API only accepts registered application IDs, so the launcher
-cannot ship with one — you register your own. It is free and takes a couple of
-minutes.
-
-1. Go to the [Azure portal](https://portal.azure.com/) and sign in.
-2. **Microsoft Entra ID → App registrations → New registration**.
-3. Give it any name. Under *Supported account types* choose
-   **Personal Microsoft accounts only**. Leave the redirect URI blank — the
-   device-code flow does not use one.
-4. Register, then copy the **Application (client) ID** from the overview page.
-5. Open **Authentication**, scroll to *Advanced settings*, and set
-   **Allow public client flows** to **Yes**. Save. Without this the device-code
-   flow is rejected.
-6. Paste the client ID into OpenMCL's **Settings → Microsoft client ID**.
-
-**Approval.** A newly registered Azure app has to be approved before Minecraft's
-API will accept it — until then the API answers `403`. Apply using the form at
-<https://aka.ms/mce-reviewappid>. This applies whether the launcher is for you
-alone or for other people, so submit it as soon as you have the client ID.
-
-If you are distributing the launcher to others, use an application ID you
-registered and had approved yourself. Reusing another project's ID attributes
-every one of your users' sign-ins to their app registration, which is both rude
-and fragile.
-
-The scope requested is `XboxLive.signin offline_access` — enough to prove you
-own the game and to refresh the session later, and nothing more.
-
-## CurseForge setup
-
-Modrinth needs no key. CurseForge does: get one free from the
-[CurseForge console](https://console.curseforge.com/) and paste it into
-**Settings → CurseForge key**. Using it means accepting CurseForge's
-[third-party API terms](https://support.curseforge.com/en/support/solutions/articles/9000207405).
-
-Some CurseForge projects have third-party downloads switched off by their
-authors. Those cannot be downloaded through any launcher; OpenMCL tells you
-which ones and links to the project page so you can fetch the jar yourself and
-drop it in the instance's mods folder.
-
-## Where things live
-
-```
-<data>/
-  settings.json          launcher settings
-  accounts.json          account tokens, mode 0600
-  instances/<id>/
-    instance.json        version, loader, overrides, mod records
-    minecraft/           the game directory: saves, mods, configs, screenshots
-  shared/
-    versions/            version JSONs and client jars
-    libraries/           maven-layout library cache
-    assets/              hashed asset store, shared by every instance
-    natives/             unpacked native libraries, per version
-  cache/                 version manifest, installers, mod icons
-  logs/                  launcher log and crash logs
-```
-
-`<data>` is `%APPDATA%\OpenMCL` on Windows,
-`~/Library/Application Support/OpenMCL` on macOS, and
-`~/.local/share/openmcl` on Linux. Set `OPENMCL_HOME` to override it — useful
-for keeping a portable copy on a USB stick.
-
-## Notes and limits
-
-- Forge below 1.13 uses the old installer format; it is handled, but those
-  versions are much less tested than modern ones.
-- The installer-processor step for Forge/NeoForge runs Java locally and can
-  take a minute or two on first install. It is idempotent: already-correct
-  outputs are skipped on reinstall.
-- CurseForge paging stops at 10,000 results, which is their API limit.
-- Modpack imports refuse archive entries whose paths escape the instance
-  directory.
-- Pre-1.7 asset layouts (`virtual` and `map_to_resources`) are materialised
-  into loose files so old versions find their sounds and language files.
-
-## Tests
+Issues and pull requests are welcome. Run the tests before opening one:
 
 ```bash
 pip install pytest
 QT_QPA_PLATFORM=offscreen python -m pytest tests/ -q
 ```
 
-The suite covers the parts where a wrong answer fails silently: maven
-coordinate mapping, rule evaluation, argument substitution, loader profile
-inheritance, classpath ordering, launch-command construction for both modern
-and legacy argument formats, archive path-traversal refusal, and the provider
-response mappings.
+They cover the parts that fail silently when wrong: maven coordinate mapping,
+rule evaluation, launch-argument substitution, loader profile inheritance,
+classpath ordering, archive path-traversal refusal, and the Modrinth and
+CurseForge response mappings. CI runs them on every push and won't build a
+release if they fail.
 
-## Licence and trademarks
+If you fork this and distribute it, **register your own Microsoft application
+ID** rather than reusing another project's. Sharing one attributes every
+user's sign-in to that project's registration.
 
-Not affiliated with Mojang, Microsoft, Modrinth or CurseForge. Minecraft is a
-trademark of Mojang Synergies AB. This launcher downloads the game from
-Mojang's own servers and requires a legitimate account that owns it.
+## Licence
+
+Free software under the [GNU GPL v3](LICENSE). Built with
+[Qt for Python](https://doc.qt.io/qtforpython/) under the LGPL v3.
+
+Not affiliated with, endorsed by or connected to Mojang, Microsoft, Modrinth or
+CurseForge. Minecraft is a trademark of Mojang Synergies AB. Game files are
+downloaded from Mojang's own servers and a legitimate account that owns the
+game is required.
