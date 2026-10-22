@@ -672,7 +672,12 @@ def test_a_dropped_worker_is_not_collected_while_running():
     import time
 
     from PySide6.QtCore import QCoreApplication
-    from openmcl.ui.workers import Worker, _live
+    # Importing the UI layer pulls in QtGui, which needs system libraries a
+    # bare CI image or a headless contributor machine may not have.
+    workers = pytest.importorskip(
+        "openmcl.ui.workers", reason="Qt GUI libraries not available"
+    )
+    Worker, _live = workers.Worker, workers._live
 
     app = QCoreApplication.instance() or QCoreApplication([])
 
