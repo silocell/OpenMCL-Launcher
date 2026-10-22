@@ -569,3 +569,36 @@ def test_download_task_detects_wrong_checksum(tmp_path):
     assert not DownloadTask("u", target, sha1="0" * 40).is_satisfied()
     assert not DownloadTask("u", target, sha1=good, size=999).is_satisfied()
     assert not DownloadTask("u", tmp_path / "missing.bin").is_satisfied()
+
+
+# ------------------------------------------------------------------- version
+
+def test_one_version_everywhere():
+    """A release must not ship a binary whose properties disagree with the app.
+
+    pyproject reads the version from the package and the Windows resource is
+    generated from it, so nothing here should hardcode a second copy.
+    """
+    import re
+    from pathlib import Path
+    import sys
+
+    root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(root / "packaging"))
+    from version import version
+
+    declared = version()
+    assert re.fullmatch(r"\d+\.\d+\.\d+", declared), declared
+
+    import openmcl
+    assert openmcl.__version__ == declared
+
+    pyproject = (root / "pyproject.toml").read_text()
+    assert 'dynamic = ["version"]' in pyproject
+    assert "openmcl.__version__" in pyproject
+
+    spec = (root / "openmcl.spec").read_text()
+    assert f'"{declared}"' not in spec, "openmcl.spec hardcodes the version"
+
+    nsi = (root / "packaging" / "installer.nsi").read_text()
+    assert "!searchparse" in nsi, "installer should read the version from source"
