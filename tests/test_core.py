@@ -658,3 +658,41 @@ def test_the_link_guard_actually_catches_a_mismatch(tmp_path, monkeypatch):
     found = re.compile(r"releases/latest/download/([A-Za-z0-9._-]+)").findall(page)
     assert found == ["OpenMCL.exe"]
     assert found[0] not in expected
+
+
+# ------------------------------------------------------- worker thread safety
+
+def test_a_dropped_worker_is_not_collected_while_running():
+    """Qt aborts the process if a running QThread is garbage collected.
+
+    Replacing `self._worker` with a new one is the natural way to write these
+    call sites, and it used to kill the app mid-sign-in with no traceback.
+    """
+    import gc
+    import time
+
+    from PySide6.QtCore import QCoreApplication
+    from openmcl.ui.workers import Worker, _live
+
+    app = QCoreApplication.instance() or QCoreApplication([])
+
+    def slow():
+        time.sleep(0.3)
+        return "done"
+
+    worker = Worker(slow, wants_progress=False)
+    worker.start()
+
+    # Exactly what the sign-in dialog does: drop the only reference.
+    del worker
+    gc.collect()
+    assert len(_live) == 1, "a running worker was left unreferenced"
+
+    held = next(iter(_live))
+    assert held.wait(5000), "worker did not finish"
+    for _ in range(50):
+        app.processEvents()
+        if not _live:
+            break
+        time.sleep(0.01)
+    assert not _live, "finished worker was never released"

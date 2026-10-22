@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 import argparse
+import faulthandler
 import logging
 import sys
 import time
+import traceback
 from pathlib import Path
 from typing import Optional
 from PySide6.QtCore import Qt, QTimer
@@ -319,9 +321,45 @@ def main(argv: Optional[list[str]] = None) -> int:
         datefmt="%H:%M:%S",
     )
     config.ensure_dirs()
-    file_handler = logging.FileHandler(config.LOGS_DIR / "launcher.log", encoding="utf-8")
+    log_path = config.LOGS_DIR / "launcher.log"
+    file_handler = logging.FileHandler(log_path, encoding="utf-8")
     file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s"))
     logging.getLogger().addHandler(file_handler)
+
+    # The released builds have no console, so a crash would otherwise leave
+    # nothing behind at all. faulthandler catches the hard ones (a segfault,
+    # or Qt aborting on a destroyed thread); excepthook catches Python errors
+    # that would otherwise vanish inside a Qt slot.
+    crash_path = config.LOGS_DIR / "crash.log"
+    try:
+        crash_file = open(crash_path, "a", encoding="utf-8")
+        crash_file.write(f"\n--- started {time.strftime('%Y-%m-%d %H:%M:%S')} ---\n")
+        crash_file.flush()
+        faulthandler.enable(file=crash_file)
+    except OSError:
+        crash_file = None
+
+    def report(exc_type, exc, tb):
+        if issubclass(exc_type, KeyboardInterrupt):
+            sys.__excepthook__(exc_type, exc, tb)
+            return
+        text = "".join(traceback.format_exception(exc_type, exc, tb))
+        log.error("unhandled error\n%s", text)
+        if crash_file is not None:
+            crash_file.write(f"\n{time.strftime('%H:%M:%S')} unhandled error\n{text}")
+            crash_file.flush()
+        try:
+            QMessageBox.critical(
+                None,
+                "OpenMCL hit a problem",
+                f"{exc}\n\nThe details were written to:\n{crash_path}\n\n"
+                "Please report this, with that file attached, at\n"
+                "https://github.com/silocell/OpenMCL-Launcher/issues",
+            )
+        except Exception:  # noqa: BLE001 - never fail inside the error handler
+            pass
+
+    sys.excepthook = report
 
     QGuiApplication.setAttribute(Qt.ApplicationAttribute.AA_DontUseNativeMenuBar, False)
     app = QApplication(sys.argv)

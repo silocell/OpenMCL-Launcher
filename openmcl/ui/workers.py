@@ -14,6 +14,14 @@ from ..net import session
 
 log = logging.getLogger(__name__)
 
+# Qt aborts the whole process if a still-running QThread is garbage collected
+# ("QThread: Destroyed while thread is still running"). That is easy to cause
+# by accident: `self._worker = new_worker` drops the previous one, and if it
+# has not quite finished the app dies instantly with no traceback. Holding a
+# reference here until the thread signals finished removes the hazard from
+# every call site at once.
+_live: set["Worker"] = set()
+
 
 class Worker(QThread):
     """Runs a callable off the UI thread.
@@ -32,6 +40,14 @@ class Worker(QThread):
         self._args = args
         self._kwargs = kwargs
         self._wants_progress = wants_progress
+
+    def start(self, priority: QThread.Priority = QThread.Priority.InheritPriority) -> None:
+        _live.add(self)
+        self.finished.connect(self._forget)
+        super().start(priority)
+
+    def _forget(self) -> None:
+        _live.discard(self)
 
     def run(self) -> None:
         try:
@@ -59,6 +75,14 @@ class _IconJob(QRunnable):
         self.url = url
         self.signals = signals
         self.size = size
+
+    def start(self, priority: QThread.Priority = QThread.Priority.InheritPriority) -> None:
+        _live.add(self)
+        self.finished.connect(self._forget)
+        super().start(priority)
+
+    def _forget(self) -> None:
+        _live.discard(self)
 
     def run(self) -> None:
         try:
